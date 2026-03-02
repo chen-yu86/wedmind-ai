@@ -1,181 +1,77 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WedMind AI</title>
-
-<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-
-<style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: radial-gradient(circle at top, #1e1e2f, #0f0f1a);
-    color: white;
-    overflow-x: hidden;
-}
-
-#particles-js {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-}
-
-.container {
-    max-width: 800px;
-    margin: auto;
-    padding: 40px 20px;
-}
-
-h1 {
-    text-align: center;
-    font-size: 42px;
-    background: linear-gradient(90deg,#9f5afd,#4cc9f0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 30px;
-}
-
-.card {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 0 30px rgba(159,90,253,0.3);
-}
-
-input, button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 12px;
-    border-radius: 12px;
-    border: none;
-    font-size: 16px;
-}
-
-input {
-    background: rgba(255,255,255,0.1);
-    color: white;
-}
-
-button {
-    background: linear-gradient(90deg,#9f5afd,#4cc9f0);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-#chatBox {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.message {
-    padding: 12px 18px;
-    margin: 10px 0;
-    border-radius: 20px;
-    max-width: 75%;
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-.user {
-    background: #4cc9f0;
-    align-self: flex-end;
-}
-
-.ai {
-    background: #9f5afd;
-    align-self: flex-start;
-}
-
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
-}
-</style>
-</head>
-
-<body>
-
-<div id="particles-js"></div>
-
-<div class="container">
-    <h1>💍 WedMind AI</h1>
-
-    <div class="card">
-        <h3>🤖 AI 婚禮顧問</h3>
-        <input id="messageInput" placeholder="輸入你想詢問的婚禮問題..." />
-        <button onclick="sendMessage()">送出</button>
-        <div id="chatBox"></div>
-    </div>
-</div>
-
-<script>
-particlesJS("particles-js", {
-  particles: {
-    number: { value: 60 },
-    size: { value: 3 },
-    move: { speed: 1 },
-    line_linked: {
-      enable: true,
-      distance: 150,
-      color: "#9f5afd",
-      opacity: 0.4,
-      width: 1
-    }
-  }
-});
-
-async function sendMessage() {
-    const input = document.getElementById("messageInput");
-    const message = input.value;
-    if (!message) return;
-
+async function sendMessage(){
+    const msg = document.getElementById("messageInput").value;
+    if(!msg) return;
     const chatBox = document.getElementById("chatBox");
 
     const userMsg = document.createElement("div");
-    userMsg.className = "message user";
-    userMsg.innerText = message;
+    userMsg.className="message user";
+    userMsg.innerText=msg;
     chatBox.appendChild(userMsg);
-
-    input.value = "";
+    document.getElementById("messageInput").value="";
 
     const response = await fetch("/chat", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: message})
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+            message: msg,
+            guests: parseInt(document.getElementById("guestInput").value),
+            budget: parseInt(document.getElementById("budgetInput").value),
+            style: document.getElementById("styleSelect").value
+        })
     });
 
     const data = await response.json();
 
     const aiMsg = document.createElement("div");
-    aiMsg.className = "message ai";
+    aiMsg.className="message ai";
+    aiMsg.innerText=data.reply;
     chatBox.appendChild(aiMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    typeEffect(aiMsg, data.reply, 20);
+    // 如果回傳 timeline 自動更新圖表
+    if(data.timeline) updateTimelineChart(data.timeline);
+
+    // 如果回傳預算，自動更新圖表
+    if(data.budget) updateBudgetChart(document.getElementById("budgetInput").value);
 }
 
-function typeEffect(element, text, speed) {
-    let i = 0;
-    element.innerHTML = "";
-    function typing() {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(typing, speed);
+// 流程時間軸 + tooltip
+function updateTimelineChart(timelineData){
+    const labels = timelineData.map(item => item.step);
+    const durations = timelineData.map(item => item.duration);
+    const suggestions = timelineData.map(item => item.suggestion || "建議: 按標準流程安排");
+
+    const ctx = document.getElementById('timelineChart').getContext('2d');
+    if(chartTimeline) chartTimeline.destroy();
+
+    chartTimeline = new Chart(ctx,{
+        type:'bar',
+        data:{
+            labels: labels,
+            datasets:[{
+                label:'時間(小時)',
+                data:durations,
+                backgroundColor:['#1d2671','#FF6384','#36A2EB','#FFCE56']
+            }]
+        },
+        options:{
+            indexAxis:'y',
+            responsive:true,
+            plugins:{
+                legend:{display:false},
+                tooltip:{
+                    callbacks:{
+                        label: function(context){
+                            const idx = context.dataIndex;
+                            return `時間: ${durations[idx]} 小時 | ${suggestions[idx]}`;
+                        }
+                    }
+                }
+            },
+            scales:{
+                x:{beginAtZero:true,title:{display:true,text:'小時'}},
+                y:{title:{display:true,text:'流程'}}
+            }
         }
-    }
-    typing();
+    });
 }
-</script>
-
-</body>
-</html>
