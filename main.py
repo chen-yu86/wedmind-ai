@@ -79,32 +79,13 @@ class SmartPlanRequest(BaseModel):
 
 @app.post("/smart_generate")
 def smart_generate(req: SmartPlanRequest):
-
-    prompt = f"""
-你是一位亞洲專業婚禮顧問。
-請根據以下條件生成完整婚禮規劃：
-
+    # 先用假資料模板，確保部署成功
+    return {
+        "result": f"""
 婚禮形式：{req.style}
 賓客人數：{req.guests}
 總預算：{req.budget}
 開席時間：{req.start_time}
-
-請輸出：
-1. 儀式流程
-2. 宴客時間軸
-3. 音樂建議
-4. 預算分配表
-5. 專業建議
-
-使用清楚條列格式。
-"""
-
-return {
-    "result": f"""
-【婚禮形式】{req.style}
-【賓客人數】{req.guests}
-【總預算】{req.budget}
-【開席時間】{req.start_time}
 
 ✔ 儀式流程：
 - 迎賓
@@ -123,7 +104,7 @@ return {
 攝影 15%
 佈置 15%
 """
-}
+    }
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
