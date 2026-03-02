@@ -1,7 +1,18 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+import os
 
 app = FastAPI(title="WedMind AI - 婚禮流程計畫")
+
+# -----------------------
+# 讀取 dashboard.html
+# -----------------------
+@app.get("/", response_class=HTMLResponse)
+def read_dashboard():
+    with open("dashboard.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 # -----------------------
 # 請求模型
@@ -16,19 +27,17 @@ class SmartPlanRequest(BaseModel):
     start_time: str
 
 # -----------------------
-# 假聊天功能
+# 聊天功能
 # -----------------------
 @app.post("/chat")
 def chat(req: ChatRequest):
-    # 假 AI 回覆
     return {"reply": f"您好！您說的是：{req.message}"}
 
 # -----------------------
-# 假婚禮流程生成
+# 婚禮流程生成
 # -----------------------
 @app.post("/smart_generate")
 def smart_generate(req: SmartPlanRequest):
-    # 假 AI 生成婚禮流程
     return {
         "result": f"""
 婚禮形式：{req.style}
@@ -54,10 +63,3 @@ def smart_generate(req: SmartPlanRequest):
 佈置 15%
 """
     }
-
-# -----------------------
-# 根目錄測試頁
-# -----------------------
-@app.get("/")
-def root():
-    return {"message": "WedMind AI 婚禮流程計畫服務已啟動 🚀"}
