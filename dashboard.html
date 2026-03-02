@@ -2,7 +2,10 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WedMind AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 
 <style>
 body {
@@ -10,6 +13,14 @@ body {
     font-family: 'Segoe UI', sans-serif;
     background: radial-gradient(circle at top, #1e1e2f, #0f0f1a);
     color: white;
+    overflow-x: hidden;
+}
+
+#particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
 }
 
 .container {
@@ -20,27 +31,28 @@ body {
 
 h1 {
     text-align: center;
-    font-size: 40px;
+    font-size: 42px;
     background: linear-gradient(90deg,#9f5afd,#4cc9f0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
 }
 
 .card {
     background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 15px;
-    margin-top: 30px;
-    box-shadow: 0 0 20px rgba(159,90,253,0.3);
+    backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(159,90,253,0.3);
 }
 
 input, button {
     width: 100%;
     padding: 12px;
-    margin-top: 10px;
-    border-radius: 10px;
+    margin-top: 12px;
+    border-radius: 12px;
     border: none;
+    font-size: 16px;
 }
 
 input {
@@ -62,13 +74,16 @@ button:hover {
 
 #chatBox {
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .message {
-    padding: 10px 15px;
+    padding: 12px 18px;
     margin: 10px 0;
-    border-radius: 15px;
-    max-width: 80%;
+    border-radius: 20px;
+    max-width: 75%;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .user {
@@ -78,11 +93,19 @@ button:hover {
 
 .ai {
     background: #9f5afd;
+    align-self: flex-start;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
 }
 </style>
 </head>
 
 <body>
+
+<div id="particles-js"></div>
 
 <div class="container">
     <h1>💍 WedMind AI</h1>
@@ -96,8 +119,25 @@ button:hover {
 </div>
 
 <script>
+particlesJS("particles-js", {
+  particles: {
+    number: { value: 60 },
+    size: { value: 3 },
+    move: { speed: 1 },
+    line_linked: {
+      enable: true,
+      distance: 150,
+      color: "#9f5afd",
+      opacity: 0.4,
+      width: 1
+    }
+  }
+});
+
 async function sendMessage() {
-    const message = document.getElementById("messageInput").value;
+    const input = document.getElementById("messageInput");
+    const message = input.value;
+    if (!message) return;
 
     const chatBox = document.getElementById("chatBox");
 
@@ -105,6 +145,8 @@ async function sendMessage() {
     userMsg.className = "message user";
     userMsg.innerText = message;
     chatBox.appendChild(userMsg);
+
+    input.value = "";
 
     const response = await fetch("/chat", {
         method: "POST",
@@ -116,8 +158,22 @@ async function sendMessage() {
 
     const aiMsg = document.createElement("div");
     aiMsg.className = "message ai";
-    aiMsg.innerText = data.reply;
     chatBox.appendChild(aiMsg);
+
+    typeEffect(aiMsg, data.reply, 20);
+}
+
+function typeEffect(element, text, speed) {
+    let i = 0;
+    element.innerHTML = "";
+    function typing() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typing, speed);
+        }
+    }
+    typing();
 }
 </script>
 
