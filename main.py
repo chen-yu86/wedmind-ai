@@ -4,6 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+@app.get("/")
+async def root():
+    return {"message": "WedMind AI API is running 🚀"}
+
 # 允許前端跨域
 app.add_middleware(
     CORSMiddleware,
