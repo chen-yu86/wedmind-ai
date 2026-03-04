@@ -1,56 +1,57 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+import sqlite3
 import json
-from database import SessionLocal, WeddingRecord, init_db
-
-init_db()
 
 app = FastAPI()
 
+# 允許前端跨域存取
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# SQLite 初始化
+conn = sqlite3.connect("database.db", check_same_thread=False)
+c = conn.cursor()
+c.execute("""
+CREATE TABLE IF NOT EXISTS user_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    data TEXT
+)
+""")
+conn.commit()
 
-# Chat 模擬
+# -------------------- Chat API --------------------
 @app.post("/chat")
-def chat(message: dict):
-    text = message.get("message", "")
-    reply = f"您好，您說的是：{text}"
-    # 簡單示範流程表
-    timeline = [{"step":"訂婚儀式","duration":2,"suggestion":"上午舉行"}] if "流程" in text else None
-    # 簡單示範預算表
-    budget = {"場地": 50000,"餐飲":30000} if "預算" in text else None
+async def chat(request: Request):
+    body = await request.json()
+    message = body.get("message", "")
+    
+    # 模擬回覆
+    reply = f"您好，您說的是：{message}"
+    
+    # 可加婚禮流程或預算的回覆
+    timeline = [{"step":"迎賓","duration":2,"suggestion":"準備紅毯"}] if "流程" in message else None
+    budget = {"場地":20000,"餐飲":15000} if "預算" in message else None
+    
     return {"reply": reply, "timeline": timeline, "budget": budget}
 
-# 儲存紀錄
-@app.post("/save_record")
-def save_record(user_id: int, record_type: str, content: dict, db: Session = Depends(get_db)):
-    record = WeddingRecord(
-        user_id=user_id,
-        record_type=record_type,
-        content=json.dumps(content)
-    )
-    db.add(record)
-    db.commit()
-    return {"msg": "保存成功"}
+# -------------------- 儲存使用者資料 --------------------
+@app.post("/save_data")
+async def save_data(request: Request):
+    body = await request.json()
+    username = body.get("username")
+    data = body.get("data")
+    c.execute("INSERT INTO user_data(username, data) VALUES (?, ?)", (username, data))
+    conn.commit()
+    return {"status":"ok"}
 
-# 取得紀錄
-@app.get("/my_records/{user_id}")
-def get_records(user_id: int, db: Session = Depends(get_db)):
-    records = db.query(WeddingRecord).filter(WeddingRecord.user_id == user_id).all()
-    return [
-        {"record_type": r.record_type, "content": json.loads(r.content)}
-        for r in records
-    ]
+@app.get("/get_data/{username}")
+async def get_data(username: str):
+    c.execute("SELECT * FROM user_data WHERE username=? ORDER BY id", (username,))
+    rows = c.fetchall()
+    return {"data":[{"id":r[0],"username":r[1],"data":r[2]} for r in rows]}

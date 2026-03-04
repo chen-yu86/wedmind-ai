@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-sqlalchemy
 pydantic
+sqlite3
+fastapi[all]
 python-multipart
-jinja2

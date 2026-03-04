@@ -27,13 +27,14 @@
     <button onclick="sendMessage()">送出</button>
     <button onclick="generateTimeline()">生成流程</button>
     <button onclick="generateBudget()">生成預算</button>
-    <button onclick="loadMyRecords()">我的紀錄</button>
-    <canvas id="budgetChart" width="400" height="200"></canvas>
+    <button onclick="saveCurrentUserData()">儲存資料</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const messagesDiv = document.getElementById("messages");
+
+// 使用者名稱（可以改成輸入框或隨機 ID）
+const username = "testUser";
 
 function appendMessage(sender, text) {
     const div = document.createElement("div");
@@ -43,6 +44,7 @@ function appendMessage(sender, text) {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
+// ------------------- 舊聊天功能 -------------------
 async function sendMessage() {
     const input = document.getElementById("userInput");
     const message = input.value.trim();
@@ -56,9 +58,9 @@ async function sendMessage() {
         body: JSON.stringify({ message })
     });
     const data = await response.json();
+
     appendMessage("bot", data.reply);
 
-    // 流程表
     if (data.timeline) {
         appendMessage("bot", "<b>婚禮流程表 📝</b>");
         let tableHTML = "<table><tr><th>步驟</th><th>時長(小時)</th><th>建議</th></tr>";
@@ -69,7 +71,6 @@ async function sendMessage() {
         appendMessage("bot", tableHTML);
     }
 
-    // 預算表
     if (data.budget) {
         appendMessage("bot", "<b>婚禮預算建議 💰</b>");
         let tableHTML = "<table><tr><th>項目</th><th>金額(元)</th></tr>";
@@ -78,19 +79,6 @@ async function sendMessage() {
         });
         tableHTML += "</table>";
         appendMessage("bot", tableHTML);
-
-        // 圓餅圖
-        const ctx = document.getElementById('budgetChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(data.budget),
-                datasets: [{
-                    data: Object.values(data.budget),
-                    backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40']
-                }]
-            }
-        });
     }
 }
 
@@ -104,15 +92,35 @@ async function generateBudget() {
     await sendMessage();
 }
 
-async function loadMyRecords() {
-    const userId = 1;  // 假設使用者ID=1
-    const res = await fetch(`/my_records/${userId}`);
-    const data = await res.json();
-    appendMessage("bot", "<b>我的婚禮紀錄 📂</b>");
-    data.forEach(record => {
-        appendMessage("bot", `<b>${record.record_type}</b>: ${JSON.stringify(record.content)}`);
+// ------------------- 新增儲存/載入使用者資料 -------------------
+async function saveUserData(username, data) {
+    await fetch("http://127.0.0.1:8000/save_data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, data: JSON.stringify(data) })
     });
 }
+
+async function loadUserData(username) {
+    const res = await fetch(`http://127.0.0.1:8000/get_data/${username}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    return JSON.parse(json.data[json.data.length - 1]);
+}
+
+// 儲存目前聊天紀錄
+async function saveCurrentUserData() {
+    await saveUserData(username, { messages: messagesDiv.innerHTML });
+    alert("資料已儲存 ✅");
+}
+
+// 頁面載入時自動讀取
+window.onload = async () => {
+    const data = await loadUserData(username);
+    if (data) {
+        messagesDiv.innerHTML = data.messages || "";
+    }
+};
 </script>
 
 </body>
