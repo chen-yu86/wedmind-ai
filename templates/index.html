@@ -4,29 +4,132 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WedMind AI 婚禮助理</title>
+
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f2f2f2; }
-    h1 { color: #333; text-align: center; }
-    #chatBox { width: 100%; max-width: 700px; margin: 20px auto; }
-    #messages { border: 1px solid #ccc; height: 400px; overflow-y: auto; padding: 10px; background: #fff; }
-    .user { color: blue; margin: 5px 0; }
-    .bot { color: green; margin: 5px 0; }
-    table { border-collapse: collapse; margin: 5px 0; }
-    table, th, td { border: 1px solid #999; padding: 5px; }
-    input[type="text"] { width: 65%; padding: 8px; }
-    button { padding: 8px 12px; margin-left: 5px; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: linear-gradient(to right, #f8f9fa, #eef1f5);
+}
+
+header {
+    background: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+#messages {
+    height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    border-radius: 10px;
+    background: #fafafa;
+    margin-bottom: 15px;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-radius: 18px;
+    max-width: 75%;
+    word-wrap: break-word;
+}
+
+.user {
+    background: #d0e6ff;
+    margin-left: auto;
+    text-align: right;
+}
+
+.bot {
+    background: #e8e8e8;
+    margin-right: auto;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.primary-btn {
+    background: #4a90e2;
+    color: white;
+}
+
+.secondary-btn {
+    background: #f0f0f0;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+}
+
+th {
+    background: #f5f5f5;
+}
 </style>
 </head>
+
 <body>
 
-<h1>WedMind AI 婚禮助理</h1>
+<header>WedMind AI 婚禮助理</header>
 
-<div id="chatBox">
-    <div id="messages"></div>
-    <input type="text" id="userInput" placeholder="輸入訊息..." />
-    <button onclick="sendMessage()">送出</button>
-    <button onclick="generateTimeline()">生成流程</button>
-    <button onclick="generateBudget()">生成預算</button>
+<div class="container">
+    <div class="card">
+        <div id="messages"></div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="輸入訊息..." />
+            <button class="primary-btn" onclick="sendMessage()">送出</button>
+        </div>
+
+        <div style="margin-top:15px; text-align:center;">
+            <button class="secondary-btn" onclick="generateTimeline()">生成流程</button>
+            <button class="secondary-btn" onclick="generateBudget()">生成預算</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -34,7 +137,7 @@ const messagesDiv = document.getElementById("messages");
 
 function appendMessage(sender, text) {
     const div = document.createElement("div");
-    div.className = sender;
+    div.classList.add("message", sender);
     div.innerHTML = text;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -44,23 +147,27 @@ async function sendMessage() {
     const input = document.getElementById("userInput");
     const message = input.value.trim();
     if (!message) return;
+
     appendMessage("user", message);
     input.value = "";
+
+    appendMessage("bot", "處理中...");
 
     const response = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message })
     });
+
     const data = await response.json();
 
-    // 回覆文字
+    messagesDiv.lastChild.remove(); // 移除處理中
+
     appendMessage("bot", data.reply);
 
-    // 流程表
     if (data.timeline) {
-        appendMessage("bot", "<b>婚禮流程表 📝</b>");
-        let tableHTML = "<table><tr><th>步驟</th><th>時長(小時)</th><th>建議</th></tr>";
+        let tableHTML = "<b>婚禮流程表 📝</b>";
+        tableHTML += "<table><tr><th>步驟</th><th>時長(小時)</th><th>建議</th></tr>";
         data.timeline.forEach(step => {
             tableHTML += `<tr><td>${step.step}</td><td>${step.duration}</td><td>${step.suggestion}</td></tr>`;
         });
@@ -68,10 +175,9 @@ async function sendMessage() {
         appendMessage("bot", tableHTML);
     }
 
-    // 預算表
     if (data.budget) {
-        appendMessage("bot", "<b>婚禮預算建議 💰</b>");
-        let tableHTML = "<table><tr><th>項目</th><th>金額(元)</th></tr>";
+        let tableHTML = "<b>婚禮預算建議 💰</b>";
+        tableHTML += "<table><tr><th>項目</th><th>金額(元)</th></tr>";
         Object.entries(data.budget).forEach(([key, value]) => {
             tableHTML += `<tr><td>${key}</td><td>${value}</td></tr>`;
         });
