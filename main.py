@@ -36,22 +36,43 @@ async def home():
 @app.post("/chat")
 async def chat(request: Request):
     body = await request.json()
-    message = body.get("message", "")
+    message = body.get("message", "").lower()
 
-    reply = f"婚禮助理建議：{message} 很棒的想法 💍"
+    # ------------------ 關鍵字群組 ------------------
+
+    timeline_keywords = [
+        "流程","時間","順序","儀式","宴客",
+        "安排","進行","步驟","典禮"
+    ]
+
+    budget_keywords = [
+        "預算","花費","多少錢","費用",
+        "開銷","價格","金額","成本"
+    ]
+
+    # ------------------ 計分機制 ------------------
+
+    timeline_score = sum(word in message for word in timeline_keywords)
+    budget_score = sum(word in message for word in budget_keywords)
 
     timeline = None
     budget = None
 
-    if "流程" in message:
+    # ------------------ 判斷 ------------------
+
+    if timeline_score > budget_score and timeline_score > 0:
+        reply = "我幫您規劃婚禮流程時間軸 💍"
+
         timeline = [
             {"step":"迎賓","duration":1,"suggestion":"播放輕音樂"},
-            {"step":"證婚儀式","duration":1.5,"suggestion":"安排誓詞"},
+            {"step":"證婚儀式","duration":1.5,"suggestion":"交換誓詞"},
             {"step":"宴客","duration":2,"suggestion":"安排抽捧花"},
-            {"step":"送客","duration":1,"suggestion":"準備小禮物"}
+            {"step":"送客","duration":1,"suggestion":"發送小禮物"}
         ]
 
-    if "預算" in message:
+    elif budget_score > timeline_score and budget_score > 0:
+        reply = "我幫您分析婚禮預算分配 💰"
+
         budget = {
             "場地":50000,
             "餐飲":80000,
@@ -60,7 +81,14 @@ async def chat(request: Request):
             "佈置":20000
         }
 
-    return {"reply": reply, "timeline": timeline, "budget": budget}
+    else:
+        reply = "我可以幫您規劃婚禮流程或分析預算，請告訴我您的需求 💍"
+
+    return {
+        "reply": reply,
+        "timeline": timeline,
+        "budget": budget
+    }
 
 # ------------------ 儲存資料 ------------------
 
