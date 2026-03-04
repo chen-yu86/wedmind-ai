@@ -6,63 +6,117 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {
-    font-family: Arial;
-    background: linear-gradient(to right,#fff0f5,#ffe4ec);
-    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #f5f1e6, #e8dcc8);
+    margin: 0;
 }
-header{
-    background:#ff69b4;
-    color:white;
-    text-align:center;
-    padding:20px;
-    font-size:24px;
+
+/* Header */
+header {
+    background: #c8a96a;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    font-size: 26px;
+    letter-spacing: 2px;
 }
-#chatBox{
-    max-width:800px;
-    margin:30px auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+
+/* 主容器 */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
 }
-button{
-    background:#ff69b4;
-    color:white;
-    border:none;
-    padding:8px 15px;
-    border-radius:5px;
-    margin:5px;
-    cursor:pointer;
+
+/* 卡片區塊 */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 35px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
-button:hover{background:#ff1493;}
-.timeline-step{
-    padding:8px;
-    margin:5px 0;
-    color:white;
-    border-radius:5px;
+
+/* 聊天顯示 */
+#messages {
+    min-height: 80px;
+    margin-bottom: 15px;
 }
-.timeline-step:nth-child(1){background:#ff7f50;}
-.timeline-step:nth-child(2){background:#ff6347;}
-.timeline-step:nth-child(3){background:#ff1493;}
-.timeline-step:nth-child(4){background:#db7093;}
+
+/* 輸入區 */
+.input-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+/* 按鈕 */
+button {
+    background: #b89b5e;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #a8894f;
+}
+
+/* 圖表區 */
+.chart-container {
+    margin-top: 30px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #777;
+}
 </style>
 </head>
 <body>
+<body>
 
-<header>💍 WedMind AI 婚禮規劃助理</header>
+<header>💍 WedMind AI 婚禮規劃系統</header>
 
-<div id="chatBox">
-    <div id="messages"></div>
+<div class="container">
 
-    <input type="text" id="userInput" placeholder="輸入 流程 或 預算">
-    <button onclick="sendMessage()">送出</button>
-    <button onclick="generateTimeline()">婚禮流程</button>
-    <button onclick="generateBudget()">婚禮預算</button>
-    <button onclick="saveData()">儲存紀錄</button>
-    <button onclick="loadData()">我的紀錄</button>
+    <div class="card">
+        <h2>婚禮規劃助理</h2>
+        <div id="messages"></div>
 
-    <canvas id="barChart"></canvas>
-    <canvas id="pieChart"></canvas>
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="輸入 流程 或 預算">
+            <button onclick="sendMessage()">送出</button>
+            <button onclick="generateTimeline()">婚禮流程</button>
+            <button onclick="generateBudget()">婚禮預算</button>
+            <button onclick="saveData()">儲存</button>
+            <button onclick="loadData()">我的紀錄</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>預算分析</h2>
+        <div class="chart-container">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -222,6 +276,9 @@ async function loadData(){
     }
 }
 </script>
+<footer>
+    © 2026 WedMind AI ｜ FastAPI + SQLite + Chart.js
+</footer>
 
 </body>
 </html>
