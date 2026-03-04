@@ -14,9 +14,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# 靜態檔案 (例如 CSS、JS、圖片)
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-
 # 首頁路由，回傳 index.html
 @app.get("/")
 async def home():
