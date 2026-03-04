@@ -10,8 +10,6 @@ body {
     background: linear-gradient(to right, #f5f1e6, #e8dcc8);
     margin: 0;
 }
-
-/* Header */
 header {
     background: #c8a96a;
     color: white;
@@ -20,15 +18,11 @@ header {
     font-size: 26px;
     letter-spacing: 2px;
 }
-
-/* 主容器 */
 .container {
     max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
 }
-
-/* 卡片區塊 */
 .card {
     background: white;
     border-radius: 12px;
@@ -36,249 +30,133 @@ header {
     margin-bottom: 35px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
-
-/* 聊天顯示 */
-#messages {
-    min-height: 80px;
-    margin-bottom: 15px;
-}
-
-/* 輸入區 */
-.input-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-}
-
-/* 按鈕 */
-button {
-    background: #b89b5e;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #a8894f;
-}
-
-/* 圖表區 */
-.chart-container {
-    margin-top: 30px;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 13px;
-    color: #777;
-}
+#messages { min-height: 80px; margin-bottom: 15px; }
+.input-group { display:flex; gap:10px; flex-wrap:wrap; }
+input { flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; }
+button { background:#b89b5e; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; transition:0.3s; }
+button:hover { background:#a8894f; }
+.chart-container { margin-top:30px; }
+.timeline-step { margin:5px 0; padding:5px 10px; background:#f0e0c4; border-radius:6px; width:0%; animation: grow 1.2s forwards; }
+@keyframes grow { from {width:0%;} to {width:100%;} }
+footer { text-align:center; padding:20px; font-size:13px; color:#777; }
 </style>
 </head>
-<body>
-<body>
 
+<body>
 <header>💍 WedMind AI 婚禮規劃系統</header>
 
 <div class="container">
 
-    <div class="card">
-        <h2>婚禮規劃助理</h2>
-        <div id="messages"></div>
+<div class="card">
+<h2>婚禮規劃助理</h2>
+<div id="messages"></div>
+<div class="input-group">
+<input type="text" id="userInput" placeholder="輸入 流程 或 預算">
+<button onclick="sendMessage()">送出</button>
+<button onclick="generateTimeline()">婚禮流程</button>
+<button onclick="generateBudget()">婚禮預算</button>
+<button onclick="saveData()">儲存</button>
+<button onclick="showMyRecords()">我的紀錄</button>
+</div>
+</div>
 
-        <div class="input-group">
-            <input type="text" id="userInput" placeholder="輸入 流程 或 預算">
-            <button onclick="sendMessage()">送出</button>
-            <button onclick="generateTimeline()">婚禮流程</button>
-            <button onclick="generateBudget()">婚禮預算</button>
-            <button onclick="saveData()">儲存</button>
-            <button onclick="loadData()">我的紀錄</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <h2>預算分析</h2>
-        <div class="chart-container">
-            <canvas id="barChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="pieChart"></canvas>
-        </div>
-    </div>
+<div class="card">
+<h2>預算分析</h2>
+<div class="chart-container">
+<canvas id="barChart"></canvas>
+</div>
+<div class="chart-container">
+<canvas id="pieChart"></canvas>
+</div>
+</div>
 
 </div>
 
 <script>
-const API_URL = "";
-const username = "testUser";
+const username="demo_user";
 const messagesDiv = document.getElementById("messages");
 let barChart=null;
 let pieChart=null;
 
-function appendMessage(text){
-    const div=document.createElement("div");
-    div.innerHTML=text;
+function appendMessage(sender, text){
+    const div = document.createElement("div");
+    div.className = sender;
+    div.innerHTML = text;
     messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 async function sendMessage(){
-    const msg=document.getElementById("userInput").value;
-    const res=await fetch("/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg})});
-    const data=await res.json();
+    const msg = document.getElementById("userInput").value;
+    if(!msg) return;
+    appendMessage("user", msg);
+    const res = await fetch("/chat", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({message:msg})});
+    const data = await res.json();
+    appendMessage("bot", data.reply);
 
-    appendMessage("<b>"+data.reply+"</b>");
-
+    // 流程時間軸
     if(data.timeline){
         data.timeline.forEach(step=>{
-            appendMessage(`<div class="timeline-step">${step.step} (${step.duration}hr) - ${step.suggestion}</div>`);
+            appendMessage("bot", `<div class="timeline-step">${step.step} (${step.duration}hr) - ${step.suggestion}</div>`);
         });
     }
 
-if(data.budget){
+    // 預算圖表
+    if(data.budget){
+        const labels = Object.keys(data.budget);
+        const values = Object.values(data.budget);
+        const total = values.reduce((a,b)=>a+b,0);
 
-    const labels = Object.keys(data.budget);
-    const values = Object.values(data.budget);
+        appendMessage("bot", `<h3 style="color:#ff1493">💰 婚禮總預算：NT$ ${total.toLocaleString()}</h3>`);
 
-    const total = values.reduce((a,b)=>a+b,0);
+        if(barChart) barChart.destroy();
+        if(pieChart) pieChart.destroy();
 
-    // 顯示總預算
-    appendMessage(`<h3 style="color:#ff1493">
-        💰 婚禮總預算：NT$ ${total.toLocaleString()}
-    </h3>`);
+        barChart = new Chart(document.getElementById("barChart"), {
+            type:"bar",
+            data:{labels:labels, datasets:[{label:"婚禮預算金額 (NTD)", data:values, backgroundColor:["#ffb6c1","#ff69b4","#ff1493","#db7093","#ffc0cb"], borderRadius:8}]},
+            options:{responsive:true, plugins:{title:{display:true,text:"💍 婚禮預算柱狀圖", font:{size:18}}}}
+        });
 
-    // 銷毀舊圖
-    if(barChart) barChart.destroy();
-    if(pieChart) pieChart.destroy();
-
-    // 🌸 柱狀圖
-    barChart = new Chart(document.getElementById("barChart"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "婚禮預算金額 (NTD)",
-                data: values,
-                backgroundColor: [
-                    "#ffb6c1",
-                    "#ff69b4",
-                    "#ff1493",
-                    "#db7093",
-                    "#ffc0cb"
-                ],
-                borderRadius: 8
-            }]
-        },
-        options:{
-            responsive:true,
-            animation:{
-                duration:1200
-            },
-            plugins:{
-                title:{
-                    display:true,
-                    text:"💍 婚禮預算分析柱狀圖",
-                    font:{size:18}
-                },
-                tooltip:{
-                    callbacks:{
-                        label:function(context){
-                            return " NT$ " + context.raw.toLocaleString();
-                        }
-                    }
-                }
-            },
-            scales:{
-                y:{
-                    ticks:{
-                        callback:function(value){
-                            return value.toLocaleString();
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // 🎀 圓餅圖
-    pieChart = new Chart(document.getElementById("pieChart"), {
-        type: "pie",
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor:[
-                    "#ffb6c1",
-                    "#ff69b4",
-                    "#ff1493",
-                    "#db7093",
-                    "#ffc0cb"
-                ]
-            }]
-        },
-        options:{
-            animation:{
-                animateRotate:true,
-                duration:1200
-            },
-            plugins:{
-                title:{
-                    display:true,
-                    text:"🎀 婚禮預算比例圓餅圖",
-                    font:{size:18}
-                },
-                tooltip:{
-                    callbacks:{
-                        label:function(context){
-                            let value=context.raw;
-                            let percent=((value/total)*100).toFixed(1);
-                            return ` NT$ ${value.toLocaleString()} (${percent}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
+        pieChart = new Chart(document.getElementById("pieChart"), {
+            type:"pie",
+            data:{labels:labels,datasets:[{data:values, backgroundColor:["#ffb6c1","#ff69b4","#ff1493","#db7093","#ffc0cb"]}]},
+            options:{plugins:{title:{display:true,text:"🎀 婚禮預算比例圓餅圖", font:{size:18}}}}
+        });
+    }
 }
 
-}
-
-function generateTimeline(){
-    document.getElementById("userInput").value="流程";
-    sendMessage();
-}
-
-function generateBudget(){
-    document.getElementById("userInput").value="預算";
-    sendMessage();
-}
+function generateTimeline(){ document.getElementById("userInput").value="流程"; sendMessage(); }
+function generateBudget(){ document.getElementById("userInput").value="預算"; sendMessage(); }
 
 async function saveData(){
-    await fetch("/save_data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:username,data:{html:messagesDiv.innerHTML}})});
+    await fetch("/save_data",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({username:username, data:{html:messagesDiv.innerHTML}})});
     alert("已儲存 💖");
 }
 
-async function loadData(){
-    const res=await fetch(`/get_data/${username}`);
-    const data=await res.json();
-    if(data.html){
-        messagesDiv.innerHTML=data.html;
-    }
+async function showMyRecords(){
+    try{
+        const res = await fetch(`/my_records?username=${username}`);
+        const data = await res.json();
+        messagesDiv.innerHTML="";
+        if(data.records.length===0){ appendMessage("bot","目前沒有紀錄 📝"); return; }
+        data.records.forEach(record=>{
+            appendMessage("user", record.userMessage);
+            appendMessage("bot", record.botReply);
+        });
+    }catch(e){ console.error(e); appendMessage("bot","載入紀錄時發生錯誤 😢"); }
 }
-</script>
-<footer>
-    © 2026 WedMind AI ｜ FastAPI + SQLite + Chart.js
-</footer>
 
+async function loadData(){
+    const res = await fetch(`/get_data/${username}`);
+    const data = await res.json();
+    if(data.html) messagesDiv.innerHTML=data.html;
+}
+
+// 自動載入上次資料
+loadData();
+</script>
+
+<footer>© 2026 WedMind AI ｜ FastAPI + SQLite + Chart.js</footer>
 </body>
 </html>
