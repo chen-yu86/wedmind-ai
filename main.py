@@ -1,46 +1,56 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.templating import Jinja2Templates
-from schemas import ChatRequest
+from sqlalchemy.orm import Session
+import json
+from database import SessionLocal, WeddingRecord, init_db
 
-app = FastAPI(title="WedMind Backend Portfolio")
+init_db()
 
-# CORS
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], 
+    allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory="templates")
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
+# Chat 模擬
 @app.post("/chat")
-async def chat_endpoint(req: ChatRequest):
-    user_msg = req.message.lower()
+def chat(message: dict):
+    text = message.get("message", "")
+    reply = f"您好，您說的是：{text}"
+    # 簡單示範流程表
+    timeline = [{"step":"訂婚儀式","duration":2,"suggestion":"上午舉行"}] if "流程" in text else None
+    # 簡單示範預算表
+    budget = {"場地": 50000,"餐飲":30000} if "預算" in text else None
+    return {"reply": reply, "timeline": timeline, "budget": budget}
 
-    if any(k in user_msg for k in ["流程", "download", "flow", "建議"]):
-        timeline = [
-            {"step": "迎賓", "duration": 1, "suggestion": "提前 30 分鐘準備迎賓流程"},
-            {"step": "儀式", "duration": 2, "suggestion": "確認婚禮儀式順序及音樂"},
-            {"step": "午宴", "duration": 2, "suggestion": "安排餐飲及座位表"},
-            {"step": "攝影", "duration": 2, "suggestion": "攝影師準備拍攝角度"}
-        ]
-        return {"reply": "已生成婚禮流程表 📝", "timeline": timeline}
+# 儲存紀錄
+@app.post("/save_record")
+def save_record(user_id: int, record_type: str, content: dict, db: Session = Depends(get_db)):
+    record = WeddingRecord(
+        user_id=user_id,
+        record_type=record_type,
+        content=json.dumps(content)
+    )
+    db.add(record)
+    db.commit()
+    return {"msg": "保存成功"}
 
-    elif any(k in user_msg for k in ["預算","budget"]):
-        budget_allocation = {
-            "場地": int(req.budget*0.4),
-            "餐飲": int(req.budget*0.3),
-            "攝影錄影": int(req.budget*0.15),
-            "佈置花藝": int(req.budget*0.15)
-        }
-        return {"reply": f"婚禮預算建議: {budget_allocation}", "budget": budget_allocation}
-
-    else:
-        return {"reply": f"您好！您說的是：{req.message}"}
+# 取得紀錄
+@app.get("/my_records/{user_id}")
+def get_records(user_id: int, db: Session = Depends(get_db)):
+    records = db.query(WeddingRecord).filter(WeddingRecord.user_id == user_id).all()
+    return [
+        {"record_type": r.record_type, "content": json.loads(r.content)}
+        for r in records
+    ]
