@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>WedMind Backend Project</title>
+</head>
+<body>
+
+<h1>WedMind Backend Portfolio</h1>
+<p>FastAPI + SQLite + JWT + Render Deployment</p>
+
+<a href="/docs">API 文件</a>
+
+<hr>
+
+<h2>Chat Demo</h2>
+
+<input id="msg" placeholder="輸入訊息">
+<button onclick="send()">送出</button>
+
+<div id="result"></div>
+
+<script>
+let token="";
+
+async function login(){
+    const res=await fetch("/token?username=admin&password=123456");
+    const data=await res.json();
+    token=data.access_token;
+}
+
+async function send(){
+    const message=document.getElementById("msg").value;
+
+    const res=await fetch("/chat",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "token":token
+        },
+        body:JSON.stringify({message})
+    });
+
+    const data=await res.json();
+    document.getElementById("result").innerHTML+=
+    "<p><b>AI:</b>"+data.reply+"</p>";
+}
+
+login();
+</script>
+
+</body>
+</html>
