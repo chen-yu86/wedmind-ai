@@ -2,10 +2,10 @@ from pydantic import BaseModel
 
 class ChatRequest(BaseModel):
     message: str
+    guests: int = 100
+    budget: int = 100000
+    style: str = "西式"
 
-class ChatResponse(BaseModel):
-    reply: str
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
+class UserCreate(BaseModel):
+    username: str
+    password: str

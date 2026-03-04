@@ -1,67 +1,46 @@
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-
-from database import Base, engine, get_db
-from models import ChatHistory
-from schemas import ChatRequest, ChatResponse, TokenResponse
-from auth import create_access_token, verify_token
-
-Base.metadata.create_all(bind=engine)
+from fastapi.templating import Jinja2Templates
+from schemas import ChatRequest
 
 app = FastAPI(title="WedMind Backend Portfolio")
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
+templates = Jinja2Templates(directory="templates")
+
 @app.get("/", response_class=HTMLResponse)
-def home():
-    with open("templates/index.html", encoding="utf-8") as f:
-        return f.read()
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/token", response_model=TokenResponse)
-def login(username: str, password: str):
-    if username == "admin" and password == "123456":
-        token = create_access_token({"sub": username})
-        return {"access_token": token, "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+@app.post("/chat")
+async def chat_endpoint(req: ChatRequest):
+    user_msg = req.message.lower()
 
-def get_current_user(token: str = Header(None)):
-    if not token:
-        raise HTTPException(status_code=401, detail="Missing token")
-    user = verify_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return user
+    if any(k in user_msg for k in ["流程", "download", "flow", "建議"]):
+        timeline = [
+            {"step": "迎賓", "duration": 1, "suggestion": "提前 30 分鐘準備迎賓流程"},
+            {"step": "儀式", "duration": 2, "suggestion": "確認婚禮儀式順序及音樂"},
+            {"step": "午宴", "duration": 2, "suggestion": "安排餐飲及座位表"},
+            {"step": "攝影", "duration": 2, "suggestion": "攝影師準備拍攝角度"}
+        ]
+        return {"reply": "已生成婚禮流程表 📝", "timeline": timeline}
 
-@app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest,
-         db: Session = Depends(get_db),
-         user: str = Depends(get_current_user)):
+    elif any(k in user_msg for k in ["預算","budget"]):
+        budget_allocation = {
+            "場地": int(req.budget*0.4),
+            "餐飲": int(req.budget*0.3),
+            "攝影錄影": int(req.budget*0.15),
+            "佈置花藝": int(req.budget*0.15)
+        }
+        return {"reply": f"婚禮預算建議: {budget_allocation}", "budget": budget_allocation}
 
-    message = req.message.lower()
-
-    if "流程" in message:
-        reply = "婚禮流程建議：迎賓 → 儀式 → 宴客 → 送客"
-    elif "預算" in message:
-        reply = "預算分配建議：場地40%、餐飲30%、攝影15%、佈置15%"
-    elif "攝影" in message:
-        reply = "建議提前與攝影師溝通拍攝清單與時間安排"
     else:
-        reply = f"您好，您說的是：{req.message}"
-
-    chat_record = ChatHistory(message=req.message, reply=reply)
-    db.add(chat_record)
-    db.commit()
-
-    return {"reply": reply}
-
-@app.get("/history")
-def get_history(db: Session = Depends(get_db)):
-    return db.query(ChatHistory).all()
+        return {"reply": f"您好！您說的是：{req.message}"}
