@@ -1,42 +1,83 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+import sqlite3
 import json
 
 app = FastAPI()
 
-# 如果前端需要跨域
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-# 首頁路由，回傳 index.html
+# SQLite 初始化
+conn = sqlite3.connect("database.db", check_same_thread=False)
+c = conn.cursor()
+c.execute("""
+CREATE TABLE IF NOT EXISTS user_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    data TEXT
+)
+""")
+conn.commit()
+
+# 首頁
 @app.get("/")
 async def home():
     return FileResponse("frontend/index.html")
 
-# 範例 chat API
+# ------------------ Chat API ------------------
+
 @app.post("/chat")
 async def chat(request: Request):
-    data = await request.json()
-    message = data.get("message", "")
-    
-    # 這裡你可以接入你的 AI 邏輯
-    reply = f"你剛剛說: {message}"
-    
-    # 範例回傳流程表或預算表
-    timeline = [
-        {"step": "迎賓", "duration": 1, "suggestion": "準備迎賓桌"},
-        {"step": "婚禮儀式", "duration": 2, "suggestion": "音樂與流程"}
-    ]
-    budget = {"場地": 50000, "餐點": 20000}
+    body = await request.json()
+    message = body.get("message", "")
+
+    reply = f"婚禮助理建議：{message} 很棒的想法 💍"
+
+    timeline = None
+    budget = None
+
+    if "流程" in message:
+        timeline = [
+            {"step":"迎賓","duration":1,"suggestion":"播放輕音樂"},
+            {"step":"證婚儀式","duration":1.5,"suggestion":"安排誓詞"},
+            {"step":"宴客","duration":2,"suggestion":"安排抽捧花"},
+            {"step":"送客","duration":1,"suggestion":"準備小禮物"}
+        ]
+
+    if "預算" in message:
+        budget = {
+            "場地":50000,
+            "餐飲":80000,
+            "攝影":30000,
+            "婚紗":40000,
+            "佈置":20000
+        }
 
     return {"reply": reply, "timeline": timeline, "budget": budget}
 
-# 其他 API 路由照舊
-# @app.post("/save_data")
-# @app.get("/get_data/{username}")
+# ------------------ 儲存資料 ------------------
+
+@app.post("/save_data")
+async def save_data(request: Request):
+    body = await request.json()
+    username = body.get("username")
+    data = body.get("data")
+
+    c.execute("INSERT INTO user_data(username, data) VALUES (?, ?)", (username, json.dumps(data)))
+    conn.commit()
+    return {"status":"ok"}
+
+@app.get("/get_data/{username}")
+async def get_data(username: str):
+    c.execute("SELECT data FROM user_data WHERE username=? ORDER BY id DESC LIMIT 1", (username,))
+    row = c.fetchone()
+    if row:
+        return json.loads(row[0])
+    return {}
