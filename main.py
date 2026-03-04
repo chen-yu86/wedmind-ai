@@ -1,56 +1,45 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-import sqlite3
+from fastapi.staticfiles import StaticFiles
+import json
 
 app = FastAPI()
 
-# -------------------- CORS --------------------
+# 如果前端需要跨域
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
-# -------------------- SQLite 初始化 --------------------
-conn = sqlite3.connect("database.db", check_same_thread=False)
-c = conn.cursor()
-c.execute("""
-CREATE TABLE IF NOT EXISTS user_data (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    data TEXT
-)
-""")
-conn.commit()
+# 靜態檔案 (例如 CSS、JS、圖片)
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
-# -------------------- Chat API --------------------
+# 首頁路由，回傳 index.html
+@app.get("/")
+async def home():
+    return FileResponse("frontend/index.html")
+
+# 範例 chat API
 @app.post("/chat")
 async def chat(request: Request):
-    body = await request.json()
-    message = body.get("message", "")
-
-    # 模擬回覆
-    reply = f"您好，您說的是：{message}"
-
-    # 婚禮流程
-    timeline = [{"step":"迎賓","duration":2,"suggestion":"準備紅毯"}] if "流程" in message else None
-    budget = {"場地":20000,"餐飲":15000} if "預算" in message else None
+    data = await request.json()
+    message = data.get("message", "")
+    
+    # 這裡你可以接入你的 AI 邏輯
+    reply = f"你剛剛說: {message}"
+    
+    # 範例回傳流程表或預算表
+    timeline = [
+        {"step": "迎賓", "duration": 1, "suggestion": "準備迎賓桌"},
+        {"step": "婚禮儀式", "duration": 2, "suggestion": "音樂與流程"}
+    ]
+    budget = {"場地": 50000, "餐點": 20000}
 
     return {"reply": reply, "timeline": timeline, "budget": budget}
 
-# -------------------- 儲存使用者資料 --------------------
-@app.post("/save_data")
-async def save_data(request: Request):
-    body = await request.json()
-    username = body.get("username")
-    data = body.get("data")
-    c.execute("INSERT INTO user_data(username, data) VALUES (?, ?)", (username, data))
-    conn.commit()
-    return {"status":"ok"}
-
-@app.get("/get_data/{username}")
-async def get_data(username: str):
-    c.execute("SELECT * FROM user_data WHERE username=? ORDER BY id", (username,))
-    rows = c.fetchall()
-    return {"data":[{"id":r[0],"username":r[1],"data":r[2]} for r in rows]}
+# 其他 API 路由照舊
+# @app.post("/save_data")
+# @app.get("/get_data/{username}")
