@@ -91,22 +91,112 @@ async function sendMessage(){
         });
     }
 
-    if(data.budget){
-        const labels=Object.keys(data.budget);
-        const values=Object.values(data.budget);
+if(data.budget){
 
-        if(barChart) barChart.destroy();
-        barChart=new Chart(document.getElementById("barChart"),{
-            type:"bar",
-            data:{labels:labels,datasets:[{data:values}]}
-        });
+    const labels = Object.keys(data.budget);
+    const values = Object.values(data.budget);
 
-        if(pieChart) pieChart.destroy();
-        pieChart=new Chart(document.getElementById("pieChart"),{
-            type:"pie",
-            data:{labels:labels,datasets:[{data:values}]}
-        });
-    }
+    const total = values.reduce((a,b)=>a+b,0);
+
+    // 顯示總預算
+    appendMessage(`<h3 style="color:#ff1493">
+        💰 婚禮總預算：NT$ ${total.toLocaleString()}
+    </h3>`);
+
+    // 銷毀舊圖
+    if(barChart) barChart.destroy();
+    if(pieChart) pieChart.destroy();
+
+    // 🌸 柱狀圖
+    barChart = new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "婚禮預算金額 (NTD)",
+                data: values,
+                backgroundColor: [
+                    "#ffb6c1",
+                    "#ff69b4",
+                    "#ff1493",
+                    "#db7093",
+                    "#ffc0cb"
+                ],
+                borderRadius: 8
+            }]
+        },
+        options:{
+            responsive:true,
+            animation:{
+                duration:1200
+            },
+            plugins:{
+                title:{
+                    display:true,
+                    text:"💍 婚禮預算分析柱狀圖",
+                    font:{size:18}
+                },
+                tooltip:{
+                    callbacks:{
+                        label:function(context){
+                            return " NT$ " + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales:{
+                y:{
+                    ticks:{
+                        callback:function(value){
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 🎀 圓餅圖
+    pieChart = new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor:[
+                    "#ffb6c1",
+                    "#ff69b4",
+                    "#ff1493",
+                    "#db7093",
+                    "#ffc0cb"
+                ]
+            }]
+        },
+        options:{
+            animation:{
+                animateRotate:true,
+                duration:1200
+            },
+            plugins:{
+                title:{
+                    display:true,
+                    text:"🎀 婚禮預算比例圓餅圖",
+                    font:{size:18}
+                },
+                tooltip:{
+                    callbacks:{
+                        label:function(context){
+                            let value=context.raw;
+                            let percent=((value/total)*100).toFixed(1);
+                            return ` NT$ ${value.toLocaleString()} (${percent}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 }
 
 function generateTimeline(){
