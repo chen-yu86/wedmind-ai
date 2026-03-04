@@ -1,11 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
-import json
 
 app = FastAPI()
 
-# 允許前端跨域存取
+# -------------------- CORS --------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,7 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# SQLite 初始化
+# -------------------- SQLite 初始化 --------------------
 conn = sqlite3.connect("database.db", check_same_thread=False)
 c = conn.cursor()
 c.execute("""
@@ -30,14 +29,14 @@ conn.commit()
 async def chat(request: Request):
     body = await request.json()
     message = body.get("message", "")
-    
+
     # 模擬回覆
     reply = f"您好，您說的是：{message}"
-    
-    # 可加婚禮流程或預算的回覆
+
+    # 婚禮流程
     timeline = [{"step":"迎賓","duration":2,"suggestion":"準備紅毯"}] if "流程" in message else None
     budget = {"場地":20000,"餐飲":15000} if "預算" in message else None
-    
+
     return {"reply": reply, "timeline": timeline, "budget": budget}
 
 # -------------------- 儲存使用者資料 --------------------
