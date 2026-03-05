@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,17 +26,19 @@
 <div class="menu">
 
 <button onclick="showSection('timeline')">婚禮流程</button>
+
 <button onclick="showSection('budget')">預算分析</button>
+
 <button onclick="showSection('checklist')">準備清單</button>
 
 </div>
+
 <div class="ai-box">
 
-<input 
-type="number" 
-id="budgetInput" 
-placeholder="輸入婚禮預算，例如 600000"
->
+<input
+type="number"
+id="budgetInput"
+placeholder="輸入婚禮預算，例如 600000">
 
 <button onclick="generateAdvice()">AI 建議</button>
 
@@ -51,6 +54,7 @@ placeholder="輸入婚禮預算，例如 600000"
 <!-- 婚禮流程 -->
 
 <div class="card section" id="timelineSection">
+
 <h2>訂婚迎娶時間軸</h2>
 
 <div class="timeline-container">
@@ -62,6 +66,9 @@ placeholder="輸入婚禮預算，例如 600000"
 <div class="timeline-container">
 <div id="weddingTimeline"></div>
 </div>
+
+</div>
+
 
 <!-- 預算分析 -->
 
@@ -79,8 +86,9 @@ id="venueSlider"
 min="50000"
 max="300000"
 step="10000"
-value="150000"
->
+value="150000">
+
+<p id="venueValue">餐廳預算：150000 元</p>
 
 </div>
 
@@ -90,7 +98,9 @@ value="150000"
 
 </div>
 
+
 <!-- 準備清單 -->
+
 <div class="card section" id="checklistSection">
 
 <h2>婚禮準備清單</h2>
@@ -109,9 +119,7 @@ value="150000"
 
 
 <script src="/frontend/data.js"></script>
-
 <script src="/frontend/script.js"></script>
 
 </body>
-
 </html>
