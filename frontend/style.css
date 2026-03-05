@@ -208,11 +208,13 @@ background:#b89a5c;
 }
 
 #aiResult{
-text-align:center;
+
 margin-top:15px;
-background:#f7870600;
+background:#ffffff;
 padding:15px;
 border-radius:8px;
 line-height:1.6;
-font-weight:bold;
+color:#333;
+font-weight:500;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
