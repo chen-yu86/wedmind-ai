@@ -181,36 +181,28 @@ document.getElementById("checklistSection").style.display="block"
 
 }
 
-
 function generateAdvice(){
-
+// ① 先顯示 AI 計算中
+document.getElementById("aiResult").innerHTML="🤖 AI 正在計算..."
 const budgetInput=document.getElementById("budgetInput").value
-
 if(!budgetInput){
-
 document.getElementById("aiResult").innerHTML="請先輸入預算"
-
 return
-
 }
 
 const total=parseInt(budgetInput)
-
 const venue=total*0.4
 const dress=total*0.15
 const photo=total*0.1
 
+// ② 顯示 AI 建議結果
 document.getElementById("aiResult").innerHTML=
-
-"💡 AI 婚禮預算建議<br><br>"+
-
+"<div class='ai-title'>🤖 AI 婚禮預算建議</div>"+
 "餐廳：約 "+venue.toLocaleString()+" 元<br>"+
-
 "婚紗：約 "+dress.toLocaleString()+" 元<br>"+
-
 "攝影：約 "+photo.toLocaleString()+" 元"
-
 }
+
 function showTimeline(type){
 
 const engagement=document.getElementById("engagementTimeline")
