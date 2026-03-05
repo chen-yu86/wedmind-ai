@@ -1,5 +1,5 @@
 body{
-font-family: Arial, sans-serif;
+font-family:Arial;
 background:#f7f3ea;
 margin:0;
 }
@@ -7,34 +7,55 @@ margin:0;
 header{
 background:#c8a96a;
 color:white;
+padding:30px;
 text-align:center;
-padding:25px;
 }
 
 .container{
-max-width:1000px;
+max-width:900px;
 margin:auto;
 padding:20px;
 }
 
 .card{
 background:white;
+padding:25px;
+margin:25px 0;
 border-radius:10px;
-padding:20px;
-margin-bottom:20px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
+/* timeline */
+
 .timeline-item{
-background:#ffeedd;
-padding:8px;
-margin-bottom:5px;
-border-radius:6px;
+border-left:4px solid #c8a96a;
+padding:10px 15px;
+margin:10px 0;
+position:relative;
+animation:fadeIn 0.6s ease;
 }
 
+.timeline-item::before{
+content:"";
+width:12px;
+height:12px;
+background:#c8a96a;
+border-radius:50%;
+position:absolute;
+left:-8px;
+top:15px;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+/* progress */
+
 .progress{
-height:20px;
 background:#eee;
+height:20px;
 border-radius:10px;
 overflow:hidden;
 margin-bottom:10px;
@@ -44,7 +65,10 @@ margin-bottom:10px;
 height:100%;
 width:0%;
 background:#c8a96a;
+transition:width 0.4s;
 }
+
+/* table */
 
 table{
 width:100%;
@@ -52,6 +76,6 @@ border-collapse:collapse;
 }
 
 td{
-border:1px solid #ddd;
-padding:6px;
+padding:8px;
+border-bottom:1px solid #eee;
 }

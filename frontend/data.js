@@ -1,17 +1,21 @@
-const timeline=[
-{time:"05:30",step:"出發"},
-{time:"06:15",step:"男方出發"},
-{time:"07:01",step:"抵達飯店"},
-{time:"07:15",step:"奉茶儀式"},
-{time:"07:35",step:"戴戒指"},
-{time:"08:00",step:"準備迎娶"},
-{time:"08:30",step:"闖關遊戲"},
-{time:"09:00",step:"拜別父母"},
-{time:"10:20",step:"抵達男方家"},
-{time:"11:10",step:"抵達婚宴會場"}
+// ---------------- 婚禮流程 ----------------
+
+const timeline = [
+{ time:"05:30", step:"出發" },
+{ time:"06:15", step:"男方出發" },
+{ time:"07:01", step:"抵達飯店" },
+{ time:"07:15", step:"奉茶儀式" },
+{ time:"07:35", step:"戴戒指" },
+{ time:"08:00", step:"準備迎娶" },
+{ time:"08:30", step:"闖關遊戲" },
+{ time:"09:00", step:"拜別父母" },
+{ time:"10:20", step:"抵達男方家" },
+{ time:"11:10", step:"抵達婚宴會場" }
 ]
 
-const budget={
+// ---------------- 婚禮預算 ----------------
+
+const budget = {
 餐廳:150000,
 婚紗:80000,
 婚攝:40000,
@@ -21,7 +25,9 @@ const budget={
 其他:90000
 }
 
-const checklist=[
+// ---------------- 婚禮準備清單 ----------------
+
+const checklist = [
 "結婚對戒",
 "金飾",
 "喜餅",
@@ -39,3 +45,8 @@ const checklist=[
 "婚鞋",
 "高跟鞋"
 ]
+
+// 讓 script.js 可以安全讀取
+window.timeline = timeline
+window.budget = budget
+window.checklist = checklist
