@@ -169,3 +169,35 @@ font-weight:bold;
 .section{
 display:none;
 }
+.timeline-container{
+position:relative;
+margin-left:20px;
+padding-left:30px;
+border-left:3px solid #d8c6a5;
+}
+
+.timeline-item{
+position:relative;
+margin-bottom:18px;
+padding-left:10px;
+font-size:15px;
+color:#444;
+}
+
+.timeline-item::before{
+content:"";
+position:absolute;
+left:-36px;
+top:6px;
+width:12px;
+height:12px;
+background:#c8a96a;
+border-radius:50%;
+border:2px solid white;
+}
+
+.timeline-time{
+font-weight:bold;
+color:#8b6f3d;
+margin-right:6px;
+}

@@ -1,21 +1,44 @@
 // ---------------- 婚禮流程 ----------------
+const engagementTimeline=[
 
-const timeline = [
-{ time:"05:30", step:"出發" },
-{ time:"06:15", step:"男方出發" },
-{ time:"07:01", step:"抵達飯店" },
-{ time:"07:15", step:"奉茶儀式" },
-{ time:"07:35", step:"戴戒指" },
-{ time:"08:00", step:"準備迎娶" },
-{ time:"08:30", step:"闖關遊戲" },
-{ time:"09:00", step:"拜別父母" },
-{ time:"10:20", step:"抵達男方家" },
-{ time:"11:10", step:"抵達婚宴會場" }
+{time:"05:30",step:"出發接送車"},
+{time:"06:15",step:"男方出發前往女方"},
+{time:"07:01",step:"抵達女方家"},
+{time:"07:10",step:"男方入座"},
+{time:"07:15",step:"奉茶儀式"},
+{time:"07:35",step:"戴訂婚戒指"},
+{time:"07:50",step:"合照"},
+{time:"08:00",step:"準備迎娶"},
+{time:"08:30",step:"闖關遊戲"},
+{time:"09:00",step:"拜別父母"},
+{time:"09:20",step:"離開女方家"},
+{time:"10:20",step:"抵達男方家"},
+{time:"10:30",step:"奉茶男方父母"},
+{time:"10:50",step:"前往婚宴會場"}
+
 ]
 
-// ---------------- 婚禮預算 ----------------
+const weddingTimeline=[
 
-const budget = {
+{time:"11:30",step:"婚宴彩排"},
+{time:"12:00",step:"來賓入場"},
+{time:"12:30",step:"開場前準備"},
+{time:"12:45",step:"主持人開場"},
+{time:"12:50",step:"播放愛情影片"},
+{time:"13:00",step:"新人第一次進場"},
+{time:"13:10",step:"交換誓言"},
+{time:"13:20",step:"交換戒指"},
+{time:"13:30",step:"主婚人敬酒"},
+{time:"14:00",step:"新人第二次進場"},
+{time:"14:10",step:"抽捧花"},
+{time:"14:30",step:"逐桌敬酒"},
+{time:"15:00",step:"第三次進場"},
+{time:"15:20",step:"送客"}
+
+]
+
+const budget={
+
 餐廳:150000,
 婚紗:80000,
 婚攝:40000,
@@ -23,11 +46,11 @@ const budget = {
 喜餅:60000,
 婚戒:120000,
 其他:90000
+
 }
 
-// ---------------- 婚禮準備清單 ----------------
+const checklist=[
 
-const checklist = [
 "結婚對戒",
 "金飾",
 "喜餅",
@@ -44,9 +67,5 @@ const checklist = [
 "抽獎卡",
 "婚鞋",
 "高跟鞋"
-]
 
-// 讓 script.js 可以安全讀取
-window.timeline = timeline
-window.budget = budget
-window.checklist = checklist
+]
