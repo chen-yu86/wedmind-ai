@@ -2,166 +2,45 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>WedMind AI 婚禮規劃助理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WedMind AI 婚禮規劃系統</title>
+<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-body { font-family: Arial, sans-serif; background:#f5f1e6; margin:0; }
-header { background:#c8a96a; color:white; text-align:center; padding:25px; font-size:26px; letter-spacing:2px; }
-.container { max-width:1000px; margin:40px auto; padding:0 20px; }
-.card { background:white; border-radius:12px; padding:25px; margin-bottom:35px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
-#messages { min-height:80px; margin-bottom:15px; }
-.input-group { display:flex; gap:10px; flex-wrap:wrap; }
-input { flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; }
-button { background:#b89b5e; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; transition:0.3s; }
-button:hover { background:#a8894f; }
-.chart-container { margin-top:30px; }
-footer { text-align:center; padding:20px; font-size:13px; color:#777; }
-</style>
 </head>
+
 <body>
 
-<header>💍 WedMind AI 婚禮規劃系統</header>
+<header>
+<h1>💍 WedMind AI 婚禮規劃系統</h1>
+<p>婚禮流程 | 預算分析 | 準備清單</p>
+</header>
 
 <div class="container">
 
-    <div class="card">
-        <h2>婚禮規劃助理</h2>
-        <div id="messages"></div>
+<div class="card">
+<h2>婚禮流程時間軸</h2>
+<div id="timeline"></div>
+</div>
 
-        <div class="input-group">
-            <input type="text" id="userInput" placeholder="輸入 流程 或 預算">
-            <button onclick="sendMessage()">送出</button>
-            <button onclick="generateTimeline()">婚禮流程</button>
-            <button onclick="generateBudget()">婚禮預算</button>
-            <button onclick="saveData()">儲存</button>
-            <button onclick="showMyRecords()">我的紀錄</button>
-            <button onclick="goHome()">回首頁</button>
-        </div>
-    </div>
+<div class="card">
+<h2>婚禮預算分析</h2>
+<canvas id="budgetChart"></canvas>
+<p id="totalBudget"></p>
+</div>
 
-    <div class="card">
-        <h2>預算分析</h2>
-        <div class="chart-container"><canvas id="barChart"></canvas></div>
-        <div class="chart-container"><canvas id="pieChart"></canvas></div>
-    </div>
+<div class="card">
+<h2>婚禮準備清單</h2>
+<div class="progress">
+<div id="progressBar"></div>
+</div>
+<p id="progressText"></p>
+<table id="checklist"></table>
+</div>
 
 </div>
 
-<script>
-const username = "demo_user";
-const messagesDiv = document.getElementById("messages");
-let barChart = null;
-let pieChart = null;
-
-function appendMessage(sender,text){
-    const div = document.createElement("div");
-    div.className = sender;
-    div.innerHTML = text;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-function goHome(){
-    messagesDiv.innerHTML = "";
-    if(barChart){ barChart.destroy(); barChart=null; }
-    if(pieChart){ pieChart.destroy(); pieChart=null; }
-    appendMessage("bot","歡迎使用婚禮規劃助理 💍");
-}
-
-async function sendMessage(){
-    const msg = document.getElementById("userInput").value;
-    if(!msg) return;
-    appendMessage("user",msg);
-
-    const res = await fetch("/chat",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({message:msg})});
-    const data = await res.json();
-
-    appendMessage("bot",data.reply);
-
-    if(data.timeline){
-        data.timeline.forEach(step=>{
-            appendMessage("bot",`${step.step} (${step.duration}hr) - ${step.suggestion}`);
-        });
-    }
-
-    if(data.budget){
-        const labels = Object.keys(data.budget);
-        const values = Object.values(data.budget);
-        const total = values.reduce((a,b)=>a+b,0);
-
-        appendMessage("bot",`💰 婚禮總預算：NT$ ${total.toLocaleString()}`);
-
-        if(barChart){ barChart.destroy(); barChart=null; }
-        if(pieChart){ pieChart.destroy(); pieChart=null; }
-
-        barChart = new Chart(document.getElementById("barChart"), {
-            type:"bar",
-            data:{ labels, datasets:[{label:"婚禮預算金額 (NTD)", data:values, backgroundColor:["#ffb6c1","#ff69b4","#ff1493","#db7093","#ffc0cb"], borderRadius:8}] },
-            options:{ responsive:true, animation:{duration:1200}, plugins:{title:{display:true,text:"💍 婚禮預算分析柱狀圖",font:{size:18}}}, scales:{y:{ticks:{callback:v=>v.toLocaleString()}}} }
-        });
-
-        pieChart = new Chart(document.getElementById("pieChart"), {
-            type:"pie",
-            data:{ labels, datasets:[{data:values, backgroundColor:["#ffb6c1","#ff69b4","#ff1493","#db7093","#ffc0cb"]}] },
-            options:{ animation:{animateRotate:true,duration:1200}, plugins:{title:{display:true,text:"🎀 婚禮預算比例圓餅圖",font:{size:18}}, tooltip:{callbacks:{label:ctx=>{let percent=((ctx.raw/total)*100).toFixed(1); return ` NT$ ${ctx.raw.toLocaleString()} (${percent}%)`;}}}} }
-        });
-    }
-}
-
-async function saveData(){
-    const records = {
-        userMessage: document.getElementById("userInput").value,
-        botReply: messagesDiv.innerHTML,
-        timeline:null,
-        budget:null
-    };
-    await fetch("/save_data",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({username,data:records})});
-    alert("已儲存 💖");
-}
-
-async function showMyRecords(){
-    try{
-        const res = await fetch(`/my_records?username=${username}`);
-        const data = await res.json();
-
-        messagesDiv.innerHTML = "";
-        if(barChart){ barChart.destroy(); barChart=null; }
-        if(pieChart){ pieChart.destroy(); pieChart=null; }
-
-        if(data.records.length === 0){ appendMessage("bot","目前沒有紀錄 📝"); return; }
-
-        for(const record of data.records){
-            appendMessage("user",record.userMessage);
-            appendMessage("bot",record.botReply);
-
-            // 重建圖表
-            if(record.budget){
-                const labels = Object.keys(record.budget);
-                const values = Object.values(record.budget);
-                const total = values.reduce((a,b)=>a+b,0);
-
-                barChart = new Chart(document.getElementById("barChart"), {
-                    type:"bar",
-                    data:{ labels, datasets:[{label:"婚禮預算金額 (NTD)", data:values, backgroundColor:["#ffb6c1","#ff69b4","#ff1493","#db7093","#ffc0cb"], borderRadius:8}] },
-                    options:{ responsive:true, animation:{duration:1200}, plugins:{title:{display:true,text:"💍 婚禮預算分析柱狀圖",font:{size:18}}}, scales:{y:{ticks:{callback:v=>v.toLocaleString()}}} }
-                });
-
-                pieChart = new Chart(document.getElementById("pieChart"), {
-                    type:"pie",
-                    data:{ labels, datasets:[{data:values, backgroundColor:["#ffb6c1","#ff69b4","#ff1493","#db7093","#ffc0cb"]}] },
-                    options:{ animation:{animateRotate:true,duration:1200}, plugins:{title:{display:true,text:"🎀 婚禮預算比例圓餅圖",font:{size:18}}, tooltip:{callbacks:{label:ctx=>{let percent=((ctx.raw/total)*100).toFixed(1); return ` NT$ ${ctx.raw.toLocaleString()} (${percent}%)`;}}}} }
-                });
-            }
-        }
-    }catch(err){ console.error(err); appendMessage("bot","載入紀錄時發生錯誤 😢"); }
-}
-
-// 快速生成
-function generateTimeline(){ document.getElementById("userInput").value="流程"; sendMessage(); }
-function generateBudget(){ document.getElementById("userInput").value="預算"; sendMessage(); }
-</script>
-
-<footer>© 2026 WedMind AI ｜ FastAPI + SQLite + Chart.js</footer>
+<script src="data.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
