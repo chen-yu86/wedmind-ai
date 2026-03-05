@@ -4,7 +4,32 @@ renderTimeline()
 renderBudget()
 renderChecklist()
 
-showSection("timeline")
+function showSection(section){
+
+document.getElementById("timelineSection").style.display="none"
+document.getElementById("budgetSection").style.display="none"
+document.getElementById("checklistSection").style.display="none"
+
+document.querySelectorAll(".menu button").forEach(btn=>{
+btn.classList.remove("active")
+})
+
+if(section==="timeline"){
+document.getElementById("timelineSection").style.display="block"
+document.querySelectorAll(".menu button")[0].classList.add("active")
+}
+
+if(section==="budget"){
+document.getElementById("budgetSection").style.display="block"
+document.querySelectorAll(".menu button")[1].classList.add("active")
+}
+
+if(section==="checklist"){
+document.getElementById("checklistSection").style.display="block"
+document.querySelectorAll(".menu button")[2].classList.add("active")
+}
+
+}
 
 })
 
