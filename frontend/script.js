@@ -4,7 +4,7 @@ renderTimeline()
 renderBudget()
 renderChecklist()
 
-initSlider()
+showSection("timeline")
 
 })
 
@@ -210,5 +210,24 @@ AI 建議婚禮規模<br>
 
 攝影：約 ${photo.toLocaleString()} 元
 `
+
+}
+function showSection(section){
+
+document.getElementById("timelineSection").style.display="none"
+document.getElementById("budgetSection").style.display="none"
+document.getElementById("checklistSection").style.display="none"
+
+if(section==="timeline"){
+document.getElementById("timelineSection").style.display="block"
+}
+
+if(section==="budget"){
+document.getElementById("budgetSection").style.display="block"
+}
+
+if(section==="checklist"){
+document.getElementById("checklistSection").style.display="block"
+}
 
 }
