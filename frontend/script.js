@@ -1,39 +1,26 @@
+let budgetChart = null
+
 document.addEventListener("DOMContentLoaded",()=>{
 
 renderTimeline()
 renderBudget()
 renderChecklist()
 
-function showSection(section){
+const slider=document.getElementById("venueSlider")
 
-document.getElementById("timelineSection").style.display="none"
-document.getElementById("budgetSection").style.display="none"
-document.getElementById("checklistSection").style.display="none"
+if(slider){
 
-document.querySelectorAll(".menu button").forEach(btn=>{
-btn.classList.remove("active")
+slider.addEventListener("input",function(){
+
+budget["餐廳"]=parseInt(this.value)
+
+renderBudget()
+
 })
-
-if(section==="timeline"){
-document.getElementById("timelineSection").style.display="block"
-document.querySelectorAll(".menu button")[0].classList.add("active")
-}
-
-if(section==="budget"){
-document.getElementById("budgetSection").style.display="block"
-document.querySelectorAll(".menu button")[1].classList.add("active")
-}
-
-if(section==="checklist"){
-document.getElementById("checklistSection").style.display="block"
-document.querySelectorAll(".menu button")[2].classList.add("active")
-}
 
 }
 
 })
-
-// ---------------- 婚禮流程 ----------------
 
 function renderTimeline(){
 
@@ -59,24 +46,35 @@ timelineDiv.appendChild(div)
 
 }
 
-// ---------------- 預算圖表 ----------------
-
-let chart=null
-
 function renderBudget(){
 
 const ctx=document.getElementById("budgetChart")
 
-if(chart){
-chart.destroy()
+const labels=Object.keys(budget)
+
+const values=Object.values(budget)
+
+const total=values.reduce((a,b)=>a+b,0)
+
+document.getElementById("totalBudget").innerText=
+"婚禮總預算："+total.toLocaleString()+" 元"
+
+if(budgetChart){
+budgetChart.destroy()
 }
 
-chart=new Chart(ctx,{
+budgetChart=new Chart(ctx,{
+
 type:"pie",
+
 data:{
-labels:Object.keys(budget),
+
+labels:labels,
+
 datasets:[{
-data:Object.values(budget),
+
+data:values,
+
 backgroundColor:[
 "#c8a96a",
 "#d9b97a",
@@ -86,18 +84,24 @@ backgroundColor:[
 "#e0c08a",
 "#c4a66f"
 ]
+
 }]
+
+},
+
+options:{
+
+responsive:true,
+
+animation:{
+duration:800
 }
+
+}
+
 })
 
-const total=Object.values(budget).reduce((a,b)=>a+b,0)
-
-document.getElementById("totalBudget").innerText=
-"婚禮總預算："+total.toLocaleString()+" 元"
-
 }
-
-// ---------------- 準備清單 ----------------
 
 function renderChecklist(){
 
@@ -115,6 +119,7 @@ const td2=document.createElement("td")
 const checkbox=document.createElement("input")
 
 checkbox.type="checkbox"
+
 checkbox.onchange=updateProgress
 
 td1.appendChild(checkbox)
@@ -130,8 +135,6 @@ table.appendChild(tr)
 
 }
 
-// ---------------- 進度條 ----------------
-
 function updateProgress(){
 
 const checks=document.querySelectorAll("input[type=checkbox]")
@@ -142,42 +145,31 @@ const done=[...checks].filter(c=>c.checked).length
 
 const percent=Math.round(done/total*100)
 
-document.getElementById("progressBar").style.width=percent+"%"
+document.getElementById("progressBar").style.width=
+percent+"%"
 
 document.getElementById("progressText").innerText=
 "完成 "+done+"/"+total+" ("+percent+"%)"
 
 }
 
-// ---------------- 滑動導航 ----------------
+function showSection(section){
 
-function scrollToTimeline(){
-document.getElementById("timeline").scrollIntoView({behavior:"smooth"})
+document.getElementById("timelineSection").style.display="none"
+document.getElementById("budgetSection").style.display="none"
+document.getElementById("checklistSection").style.display="none"
+
+if(section==="timeline"){
+document.getElementById("timelineSection").style.display="block"
 }
 
-function scrollToBudget(){
-document.getElementById("budgetChart").scrollIntoView({behavior:"smooth"})
+if(section==="budget"){
+document.getElementById("budgetSection").style.display="block"
 }
 
-function scrollToChecklist(){
-document.getElementById("checklist").scrollIntoView({behavior:"smooth"})
+if(section==="checklist"){
+document.getElementById("checklistSection").style.display="block"
 }
-
-// ---------------- Slider ----------------
-
-function initSlider(){
-
-const slider=document.getElementById("venueSlider")
-
-if(!slider) return
-
-slider.addEventListener("input",function(){
-
-budget["餐廳"]=parseInt(this.value)
-
-renderBudget()
-
-})
 
 }
 
@@ -199,22 +191,19 @@ let advice=""
 
 if(budgetValue<500000){
 
-advice=
-"建議小型婚禮（50~80人）"
+advice="建議小型婚禮（50~80人）"
 
 }
 
 else if(budgetValue<800000){
 
-advice=
-"建議中型婚禮（100~150人）"
+advice="建議中型婚禮（100~150人）"
 
 }
 
 else{
 
-advice=
-"建議大型婚禮（200人以上）"
+advice="建議大型婚禮（200人以上）"
 
 }
 
@@ -227,7 +216,7 @@ const dress=Math.round(budgetValue*0.1)
 document.getElementById("aiResult").innerHTML=
 
 `
-AI 建議婚禮規模<br>
+${advice}<br>
 
 餐廳：約 ${venue.toLocaleString()} 元<br>
 
@@ -235,24 +224,5 @@ AI 建議婚禮規模<br>
 
 攝影：約 ${photo.toLocaleString()} 元
 `
-
-}
-function showSection(section){
-
-document.getElementById("timelineSection").style.display="none"
-document.getElementById("budgetSection").style.display="none"
-document.getElementById("checklistSection").style.display="none"
-
-if(section==="timeline"){
-document.getElementById("timelineSection").style.display="block"
-}
-
-if(section==="budget"){
-document.getElementById("budgetSection").style.display="block"
-}
-
-if(section==="checklist"){
-document.getElementById("checklistSection").style.display="block"
-}
 
 }
