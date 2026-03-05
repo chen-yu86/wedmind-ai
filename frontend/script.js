@@ -211,3 +211,20 @@ document.getElementById("aiResult").innerHTML=
 "攝影：約 "+photo.toLocaleString()+" 元"
 
 }
+function showTimeline(type){
+
+const engagement=document.getElementById("engagementTimeline")
+const wedding=document.getElementById("weddingTimeline")
+
+engagement.style.display="none"
+wedding.style.display="none"
+
+if(type==="engagement"){
+engagement.style.display="block"
+}
+
+if(type==="wedding"){
+wedding.style.display="block"
+}
+
+}

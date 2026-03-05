@@ -114,6 +114,24 @@ color:#8b6f3d;
 margin-right:6px;
 }
 
+.timeline-buttons{
+text-align:center;
+margin-bottom:20px;
+}
+
+.timeline-buttons button{
+background:#c8a96a;
+color:white;
+border:none;
+padding:8px 14px;
+margin:5px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.timeline-buttons button:hover{
+background:#b89a5c;
+}
 
 /* progress */
 
