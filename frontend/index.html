@@ -1,46 +1,119 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>WedMind AI 婚禮規劃系統</title>
+
 <link rel="stylesheet" href="/frontend/style.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
 <header>
+
 <h1>💍 WedMind AI 婚禮規劃系統</h1>
-<p>婚禮流程 | 預算分析 | 準備清單</p>
+
+<p>婚禮流程 ｜ 預算分析 ｜ 準備清單</p>
+
+<div class="menu">
+
+<button onclick="scrollToTimeline()">婚禮流程</button>
+
+<button onclick="scrollToBudget()">預算分析</button>
+
+<button onclick="scrollToChecklist()">準備清單</button>
+
+</div>
+<div class="ai-box">
+
+<input 
+type="number" 
+id="budgetInput" 
+placeholder="輸入婚禮預算，例如 600000"
+>
+
+<button onclick="generateAdvice()">AI 建議</button>
+
+</div>
+
+<p id="aiResult"></p>
+
 </header>
+
 
 <div class="container">
 
+<!-- 婚禮流程 -->
+
 <div class="card">
+
 <h2>婚禮流程時間軸</h2>
+
 <div id="timeline"></div>
+
 </div>
 
+
+<!-- 預算分析 -->
+
 <div class="card">
+
 <h2>婚禮預算分析</h2>
-<canvas id="budgetChart"></canvas>
-<p id="totalBudget"></p>
+
+<div class="slider-box">
+
+<label>調整餐廳預算</label>
+
+<input 
+type="range" 
+id="venueSlider" 
+min="50000" 
+max="300000" 
+step="10000" 
+value="150000"
+>
+
 </div>
+
+<canvas id="budgetChart"></canvas>
+
+<p id="totalBudget"></p>
+
+</div>
+
+
+<!-- 準備清單 -->
 
 <div class="card">
+
 <h2>婚禮準備清單</h2>
+
 <div class="progress">
+
 <div id="progressBar"></div>
+
 </div>
-<p id="progressText"></p>
+
+<p id="progressText">完成 0%</p>
+
 <table id="checklist"></table>
+
 </div>
 
 </div>
+
 
 <script src="/frontend/data.js"></script>
+
 <script src="/frontend/script.js"></script>
 
 </body>
+
 </html>

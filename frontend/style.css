@@ -1,15 +1,52 @@
 body{
-font-family:Arial;
-background:#f7f3ea;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+background:#f5f1e8;
 margin:0;
+color:#333;
 }
+
+/* header */
 
 header{
 background:#c8a96a;
 color:white;
-padding:30px;
+padding:40px 20px;
 text-align:center;
 }
+
+header h1{
+margin:0;
+font-size:32px;
+}
+
+header p{
+opacity:0.9;
+}
+
+/* menu */
+
+.menu{
+text-align:center;
+margin-top:20px;
+}
+
+.menu button{
+background:white;
+border:none;
+padding:10px 18px;
+margin:5px;
+border-radius:20px;
+font-size:14px;
+cursor:pointer;
+color:#c8a96a;
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.menu button:hover{
+background:#f0e6d4;
+}
+
+/* container */
 
 .container{
 max-width:900px;
@@ -17,12 +54,18 @@ margin:auto;
 padding:20px;
 }
 
+/* cards */
+
 .card{
 background:white;
 padding:25px;
-margin:25px 0;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+margin:30px 0;
+border-radius:16px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card h2{
+margin-top:0;
 }
 
 /* timeline */
@@ -32,7 +75,6 @@ border-left:4px solid #c8a96a;
 padding:10px 15px;
 margin:10px 0;
 position:relative;
-animation:fadeIn 0.6s ease;
 }
 
 .timeline-item::before{
@@ -43,19 +85,14 @@ background:#c8a96a;
 border-radius:50%;
 position:absolute;
 left:-8px;
-top:15px;
-}
-
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
+top:14px;
 }
 
 /* progress */
 
 .progress{
 background:#eee;
-height:20px;
+height:18px;
 border-radius:10px;
 overflow:hidden;
 margin-bottom:10px;
@@ -68,7 +105,7 @@ background:#c8a96a;
 transition:width 0.4s;
 }
 
-/* table */
+/* checklist */
 
 table{
 width:100%;
@@ -76,6 +113,52 @@ border-collapse:collapse;
 }
 
 td{
-padding:8px;
+padding:10px;
 border-bottom:1px solid #eee;
+}
+
+input[type="checkbox"]{
+transform:scale(1.2);
+}
+
+/* slider */
+
+.slider-box{
+margin-top:20px;
+}
+
+.slider-box input{
+width:100%;
+}
+
+.ai-box{
+text-align:center;
+margin-top:20px;
+}
+
+.ai-box input{
+padding:8px;
+width:220px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.ai-box button{
+background:#c8a96a;
+color:white;
+border:none;
+padding:8px 14px;
+margin-left:8px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.ai-box button:hover{
+background:#b89a5c;
+}
+
+#aiResult{
+text-align:center;
+margin-top:10px;
+font-weight:bold;
 }
