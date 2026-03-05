@@ -22,3 +22,10 @@ Backend (可延伸)
 
 ## Demo
 可部署於 Render 或 GitHub Pages
+
+Live Demo (Render Free Tier)
+https://wedmind-ai.onrender.com
+
+Note:
+The demo is deployed on Render free tier.
+If the server is sleeping, it may take around 30 seconds to start.
